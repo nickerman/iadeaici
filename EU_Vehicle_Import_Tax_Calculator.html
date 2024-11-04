@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Vehicle Import Tax Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        form {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result p {
+            color: #333;
+            font-size: 18px;
+        }
+        #result h4 {
+            font-size: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>EU Vehicle Import Tax Calculator</h2>
+    <form id="taxForm">
+        <label for="country">Select Country of Import:</label>
+        <select id="country" required>
+            <option value="France">France</option>
+            <option value="Germany">Germany</option>
+            <option value="Netherlands">Netherlands</option>
+            <option value="Denmark">Denmark</option>
+            <option value="Belgium">Belgium</option>
+            <option value="Luxembourg">Luxembourg</option>
+            <option value="Austria">Austria</option>
+            <option value="Italy">Italy</option>
+            <option value="Hungary">Hungary</option>
+        </select>
+
+        <label for="vehicleAge">Vehicle Age:</label>
+        <select id="vehicleAge" required>
+            <option value="new">New (under 6 months or 6,000 km)</option>
+            <option value="used">Used (over 6 months and 6,000 km)</option>
+        </select>
+
+        <label for="originCountry">Origin Country:</label>
+        <select id="originCountry" required>
+            <option value="EU">EU</option>
+            <option value="EFTA">EFTA (Norway, Iceland, etc.)</option>
+            <option value="nonEU">Non-EU/Non-EFTA</option>
+        </select>
+
+        <label for="purchasePrice">Purchase Price (€):</label>
+        <input type="number" id="purchasePrice" required>
+
+        <label for="emissions">CO₂ Emissions (g/km):</label>
+        <input type="number" id="emissions" required>
+
+        <label for="engineSize">Engine Size (cc):</label>
+        <input type="number" id="engineSize" required>
+
+        <button type="button" onclick="calculateTaxes()">Calculate Taxes</button>
+    </form>
+
+    <h3>Estimated Taxes and Fees:</h3>
+    <div id="result"></div>
+
+    <script>
+        function calculateTaxes() {
+            // Get form values
+            const country = document.getElementById("country").value;
+            const vehicleAge = document.getElementById("vehicleAge").value;
+            const originCountry = document.getElementById("originCountry").value;
+            const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
+            const emissions = parseFloat(document.getElementById("emissions").value);
+
+            // Define tax and duty rates based on the selected country
+            const rates = {
+                "France": { vat: 0.20, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Germany": { vat: 0.19, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Netherlands": { vat: 0.21, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Denmark": { vat: 0.25, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Belgium": { vat: 0.21, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Luxembourg": { vat: 0.17, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Austria": { vat: 0.20, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Italy": { vat: 0.22, duty: originCountry === "nonEU" ? 0.10 : 0 },
+                "Hungary": { vat: 0.27, duty: originCountry === "nonEU" ? 0.10 : 0 },
+            };
+
+            const selectedRates = rates[country];
+
+            // VAT Calculation
+            let vat = 0;
+            if (vehicleAge === "new" || (vehicleAge === "used" && originCountry === "nonEU")) {
+                vat = purchasePrice * selectedRates.vat;
+            }
+
+            // Customs Duty Calculation
+            let customsDuty = purchasePrice * selectedRates.duty;
+
+            // CO₂-based Environmental Tax
+            let environmentalTax = emissions * 2; // Simplified at €2 per g/km CO₂ for example
+
+            // Additional Fees
+            const technicalInspectionFee = 80; // Estimated inspection cost
+            const adminFee = 120; // Registration and administrative fees
+
+            // Total Calculation
+            const totalTax = vat + customsDuty + environmentalTax + technicalInspectionFee + adminFee;
+
+            // Display Results
+            document.getElementById("result").innerHTML = `
+                <p><strong>Country:</strong> ${country}</p>
+                <p>VAT: €${vat.toFixed(2)}</p>
+                <p>Customs Duty: €${customsDuty.toFixed(2)}</p>
+                <p>CO₂ Environmental Tax: €${environmentalTax.toFixed(2)}</p>
+                <p>Technical Inspection Fee: €${technicalInspectionFee.toFixed(2)}</p>
+                <p>Administrative Fee: €${adminFee.toFixed(2)}</p>
+                <h4>Total Estimated Tax and Fees: €${totalTax.toFixed(2)}</h4>
+            `;
+        }
+    </script>
+</body>
+</html>
